@@ -16,8 +16,8 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body
-        expect(body).toBeInstanceOf(Array)
-        expect(body.length).toBe(3)
+        expect(body.topics).toBeInstanceOf(Array)
+        expect(body.topics.length).toBe(3)
       })
     });
 
@@ -27,7 +27,7 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body
-        body.forEach((topic) => {
+        body.topics.forEach((topic) => {
           expect(typeof topic.description).toBe('string')
           expect(typeof topic.slug).toBe('string')
         })
@@ -43,10 +43,10 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body
-        expect(body).toBeInstanceOf(Object)
-        expect(typeof body["GET /api/articles"]["description"]).toBe('string');
-        expect(body["GET /api/articles"]["queries"]).toBeInstanceOf(Array);
-        expect(body["GET /api/articles"]["exampleResponse"]).toBeInstanceOf(Object);
+        expect(body.endpoints).toBeInstanceOf(Object)
+        expect(typeof body.endpoints["GET /api/articles"]["description"]).toBe('string');
+        expect(body.endpoints["GET /api/articles"]["queries"]).toBeInstanceOf(Array);
+        expect(body.endpoints["GET /api/articles"]["exampleResponse"]).toBeInstanceOf(Object);
       })
     });
 
@@ -57,8 +57,50 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body
-        expect(body).toEqual(endpoints);
+        expect(body.endpoints).toEqual(endpoints);
       })
+    });
+  });
+
+  describe('GET /api/articles/:article_id', () => {
+    test('should return a status code of 200 and the correct article', () => {
+      return request(app)
+      .get('/api/articles/3')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body.article).toEqual({
+          article_id: 3,
+          title: "Eight pug gifs that remind me of mitch",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "some gifs",
+          created_at: "2020-11-03T09:12:00.000Z",
+          votes: 0,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      })
+    });
+
+    test('should return 400: bad request if passed an article id that is not a number', () => {
+      return request(app)
+      .get('/api/articles/not-an-article')
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+
+    test('should return 404: not found if passed an article id that is an id not found in the database', () => {
+      return request(app)
+      .get('/api/articles/999999999')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
     });
   });
 })
