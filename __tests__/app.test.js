@@ -3,6 +3,7 @@ const { app } = require('../app')
 const db = require('../db/connection')
 const seed = require('../db/seeds/seed')
 const { articleData, commentData, topicData, userData } = require('../db/data/test-data')
+const fs = require('fs').promises;
 
 beforeEach(() => seed({ articleData, commentData, topicData, userData }));
 afterAll(() => db.end())
@@ -26,7 +27,6 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body
-        console.log(body)
         body.forEach((topic) => {
           expect(typeof topic.description).toBe('string')
           expect(typeof topic.slug).toBe('string')
@@ -34,4 +34,31 @@ describe('App', () => {
       })
     });
   })
+
+  describe('GET /api', () => {
+    test('GET:200 should respond with an object describing all of the available endpoints', () => {
+      const endpoints = require('../endpoints.json');
+      return request(app)
+      .get('/api')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body).toBeInstanceOf(Object)
+        expect(typeof body["GET /api/articles"]["description"]).toBe('string');
+        expect(body["GET /api/articles"]["queries"]).toBeInstanceOf(Array);
+        expect(body["GET /api/articles"]["exampleResponse"]).toBeInstanceOf(Object);
+      })
+    });
+
+    test('object returned by GET /api should be identical to the contents of the endpoints.json file', () => {
+      const endpoints = require('../endpoints.json');
+      return request(app)
+      .get('/api')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body).toEqual(endpoints);
+      })
+    });
+  });
 })

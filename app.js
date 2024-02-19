@@ -1,10 +1,10 @@
 const express = require('express')
 const app = express()
-const { getAllTopics } = require('./controller/controller.js')
-
-const topicsRegex = new RegExp(/\/api\/topics.*/g)
+const { getAllTopics, getAllEndpoints } = require('./controller/controller.js')
 
 app.use(express.json())
+
+app.get('/api', getAllEndpoints)
 
 app.get(`/api/topics`, getAllTopics)
 
