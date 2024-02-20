@@ -187,5 +187,73 @@ describe('App', () => {
         })
       })
     });
+
+    test('should return 400: bad request if passed an article id that is not a number', () => {
+      return request(app)
+      .get('/api/articles/not-an-article/comments')
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+
+    test('should return 404: not found if passed an article id that is an id not found in the database', () => {
+      return request(app)
+      .get('/api/articles/999999999/comments')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
+    });
+  });
+
+  describe('Post /api/articles/:article_id/comments', () => {
+    test('should respond with status: 201 and the posted comment after being given a new comment', () => {
+      const requestBody = {
+        username: 'butter_bridge',
+        body: 'This is a new comment'
+      }
+      return request(app)
+      .post('/api/articles/1/comments')
+      .send(requestBody)
+      .expect(201)
+      .then((response) => {
+        const body = response.body
+        expect(typeof body.comment.comment_id).toBe('number')
+        expect(body.comment.body).toBe('This is a new comment')
+        expect(typeof body.comment.votes).toBe('number')
+        expect(body.comment.author).toBe('butter_bridge')
+        expect(body.comment.article_id).toBe(1)
+        expect(typeof body.comment.created_at).toBe('string')
+      })
+    });
+
+    test('missing keys on post object should return status: 400', () => {
+      const requestBody = {
+        body: 'This is a new comment'
+      }
+      return request(app)
+      .post('/api/articles/1/comments')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      })
+    });
+
+    test('should return 400: bad request if passed an article id that is not a number', () => {
+      return request(app)
+      .post('/api/articles/not-an-article/comments')
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+    
+    // need to add a test here for if passed an article id that does not exists (eg. post /api/articles/99999999/comments), can't figure out right now so will come back to this later
   });
 })
