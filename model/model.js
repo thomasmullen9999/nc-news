@@ -97,3 +97,26 @@ exports.insertCommentByArticleId = (articleId, newComment) => {
       next(err)
     })
 }
+
+exports.updateArticleById = (articleId, inc_votes) => {
+  const articleIdNum = Number(articleId)
+  const regex = new RegExp(/[^\d]/g)
+  if (regex.test(articleIdNum)) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  if (!inc_votes) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  return db.query(
+    `UPDATE articles 
+    SET votes = votes + $1
+    WHERE article_id = $2
+    RETURNING *;`, 
+    [inc_votes, articleId])
+    .then((article) => {
+      if (article.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not found" })
+      }
+      return article.rows[0]
+    })
+}

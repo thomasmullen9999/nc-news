@@ -256,4 +256,80 @@ describe('App', () => {
     
     // need to add a test here for if passed an article id that does not exists (eg. post /api/articles/99999999/comments), can't figure out right now so will come back to this later
   });
+  describe('patch /api/articles/:article_id', () => {
+    test('should respond with status code: 200 and the updated article', () => {
+      const requestBody = {
+        inc_votes: 50
+      }
+      return request(app)
+      .patch('/api/articles/1')
+      .send(requestBody)
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(typeof body.article.author).toBe('string')
+        expect(typeof body.article.title).toBe('string')
+        expect(typeof body.article.article_id).toBe('number')
+        expect(typeof body.article.topic).toBe('string')
+        expect(typeof body.article.created_at).toBe('string')
+        expect(typeof body.article.votes).toBe('number')
+        expect(typeof body.article.article_img_url).toBe('string')
+        expect(typeof body.article.body).toBe('string')
+      });
+    });
+    
+    test('votes property should be changed by the correct amount', () => {
+      const requestBody = {
+        inc_votes: 50
+      }
+      return request(app)
+      .patch('/api/articles/1')
+      .send(requestBody)
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body.article.votes).toBe(150)
+      });
+    });
+
+    test('should return 400: bad request if passed an article id that is not a number', () => {
+      const requestBody = {
+        inc_votes: 50
+      }
+      return request(app)
+      .patch('/api/articles/not-an-article')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+
+    test('should return 404: not found if passed an article id that is an id not found in the database', () => {
+      const requestBody = {
+        inc_votes: 50
+      }
+      return request(app)
+      .patch('/api/articles/999999999')
+      .send(requestBody)
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
+    });
+
+    test('missing keys on post object should return status: 400', () => {
+      const requestBody = {}
+      return request(app)
+      .patch('/api/articles/1')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      })
+    });
+  });
 })
