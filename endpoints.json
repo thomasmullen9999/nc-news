@@ -43,7 +43,7 @@
     }
   },
   "GET /api/articles/:article_id/comments": {
-    "description": " serves up an array of all comments for the article with the given id",
+    "description": "serves up an array of all comments for the article with the given id",
     "queries": [],
     "exampleResponse": {
       "comments": [
@@ -53,7 +53,7 @@
           "votes": 16,
           "author": "butter_bridge",
           "article_id": 9,
-          "created_at": 1586179020000
+          "created_at": "2020-04-06T12:17:00.000Z"
         },
         {
           "comment_id": 17,
@@ -61,9 +61,29 @@
           "votes": 20,
           "author": "icellusedkars",
           "article_id": 9,
-          "created_at": 1584205320000
+          "created_at": "2020-03-14T17:02:00.000Z"
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "adds a new comment for the article with the given id",
+    "queries": [],
+    "requestBodyFormat": {
+      "username": "new username",
+      "body": "request body"
+    },
+    "exampleResponse": {
+      "comment":
+        {
+          "comment_id": 67,
+          "body": "request body",
+          "votes": 0,
+          "author": "new username",
+          "article_id": 5,
+          "created_at": "2020-01-01T03:08:00.000Z"
+        }
+    }
   }
+
 }

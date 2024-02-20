@@ -53,7 +53,7 @@ exports.selectAllArticles = async () => {
       })
     }))
   })
-}
+} 
 
 exports.selectArticleById = async (articleId) => {
   const articleIdNum = Number(articleId)
@@ -88,4 +88,31 @@ exports.selectCommentsByArticleId = (articleId) => {
     }
     return comments.rows
   })
+}
+
+exports.insertCommentByArticleId = (articleId, newComment) => {
+  const articleIdNum = Number(articleId)
+  const regex = new RegExp(/[^\d]/g)
+  if (regex.test(articleIdNum)) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  const { username, body } = newComment;
+  if (!username || !body) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  // need to check if the article exists
+  
+  return db.query(
+    `INSERT INTO comments 
+      (author, body, article_id, votes)
+    VALUES
+      ($1, $2, $3, $4)
+    RETURNING *;`, 
+    [username, body, articleId, 0])
+    .then((comment) => {
+      return comment.rows[0]
+    })
+    .catch((err) => {
+      next(err)
+    })
 }
