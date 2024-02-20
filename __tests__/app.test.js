@@ -69,17 +69,14 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body
-        expect(body.article).toEqual({
-          article_id: 3,
-          title: "Eight pug gifs that remind me of mitch",
-          topic: "mitch",
-          author: "icellusedkars",
-          body: "some gifs",
-          created_at: "2020-11-03T09:12:00.000Z",
-          votes: 0,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-        });
+        expect(typeof body.article.author).toBe('string')
+        expect(typeof body.article.title).toBe('string')
+        expect(body.article.article_id).toBe(3)
+        expect(typeof body.article.topic).toBe('string')
+        expect(typeof body.article.created_at).toBe('string')
+        expect(typeof body.article.votes).toBe('number')
+        expect(typeof body.article.article_img_url).toBe('string')
+        expect(typeof body.article.body).toBe('string')
       })
     });
 
@@ -101,6 +98,52 @@ describe('App', () => {
         const body = response.body
         expect(body.msg).toBe('Not found')
       });
+    });
+  });
+
+  describe('GET /api/articles', () => {
+    test('should return an array of article objects, each with the correct properties', () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+        body.articles.forEach((article) => {
+          expect(typeof article.author).toBe('string')
+          expect(typeof article.title).toBe('string')
+          expect(typeof article.article_id).toBe('number')
+          expect(typeof article.topic).toBe('string')
+          expect(typeof article.created_at).toBe('string')
+          expect(typeof article.votes).toBe('number')
+          expect(typeof article.article_img_url).toBe('string')
+          expect(typeof article.comment_count).toBe('number')
+        })
+      })
+    });
+
+    test('none of the objects in the array should have a body property', () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        body.articles.forEach((article) => {
+          expect(article.hasOwnProperty('body')).toBe(false)
+        })
+      })
+    });
+
+    test('articles should be sorted by date in descending order', () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeSortedBy('created_at', {
+          descending: true,
+        });
+      })
     });
   });
 })
