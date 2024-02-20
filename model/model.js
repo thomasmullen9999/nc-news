@@ -1,21 +1,6 @@
 const db = require ('../db/connection.js')
 const fs = require("fs/promises");
 
-function getCommentCount(articleId) {
-  return new Promise((resolve, reject) => {
-    return db.query(`
-    SELECT COUNT(*)
-    FROM comments
-    WHERE article_id = $1;`, [articleId])
-      .then((result) => {
-        resolve(result.rows[0].count)
-      })
-      .catch((err) => {
-        next(err)
-      })
-  })
-}
-
 exports.selectAllEndpoints = () => {
   return fs.readFile(`${__dirname}/../endpoints.json`, 'utf-8')
   .then((endpointsFile, err) => {
@@ -40,20 +25,16 @@ exports.selectAllTopics = async () => {
 }
 
 exports.selectAllArticles = async () => {
-  return db.query(`SELECT * FROM articles ORDER BY created_at DESC;`)
+  return db.query(`SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.body) AS comment_count FROM articles JOIN comments ON articles.article_id = comments.article_id 
+  GROUP BY articles.article_id
+  ORDER BY created_at DESC;`)
   .then((articles) => {
-    return Promise.all(articles.rows.map((row) => {
-      return new Promise((resolve, reject) => {
-        getCommentCount(row.article_id)
-          .then((commentCount) => {
-            row.comment_count = Number(commentCount);
-            delete row.body;
-            resolve(row);
-          })
-      })
-    }))
+    return articles.rows
   })
-} 
+  .catch((err) => {
+    console.log(err)
+  })
+}
 
 exports.selectArticleById = async (articleId) => {
   const articleIdNum = Number(articleId)
