@@ -1,24 +1,30 @@
 const db = require ('../db/connection.js')
 const fs = require("fs/promises");
 
-
-function getListOfArticleIds() {
-  return db.query(`SELECT DISTINCT article_id FROM articles;`)
-  .then((result) => {
-    const articleIdList = result.rows.map((row) => row.article_id)
-    return articleIdList
+function getCommentCount(articleId) {
+  return new Promise((resolve, reject) => {
+    return db.query(`
+    SELECT COUNT(*)
+    FROM comments
+    WHERE article_id = $1;`, [articleId])
+      .then((result) => {
+        resolve(result.rows[0].count)
+      })
+      .catch((err) => {
+        next(err)
+      })
   })
 }
 
 exports.selectAllEndpoints = () => {
-    return fs.readFile(`${__dirname}/../endpoints.json`, 'utf-8')
-    .then((endpointsFile, err) => {
-      const parsedFile = JSON.parse(endpointsFile);
-      return parsedFile;
-    })
-    .catch((err) => {
-      return err
-    })
+  return fs.readFile(`${__dirname}/../endpoints.json`, 'utf-8')
+  .then((endpointsFile, err) => {
+    const parsedFile = JSON.parse(endpointsFile);
+    return parsedFile;
+  })
+  .catch((err) => {
+    return err
+  })
 }
 
 exports.selectAllTopics = async () => {
@@ -33,20 +39,43 @@ exports.selectAllTopics = async () => {
   }
 }
 
+exports.selectAllArticles = async () => {
+  return db.query(`SELECT * FROM articles ORDER BY created_at DESC;`)
+  .then((articles) => {
+    return Promise.all(articles.rows.map((row) => {
+      return new Promise((resolve, reject) => {
+        getCommentCount(row.article_id)
+          .then((commentCount) => {
+            row.comment_count = Number(commentCount);
+            delete row.body;
+            resolve(row);
+          })
+      })
+    }))
+    /* articles.rows.forEach((row) => {
+      // need to get the comment count of each row here
+      getCommentCount(row.article_id).then((commentCount) => {
+        console.log(commentCount, '<comment count', row.article_id, '<< article_id')
+      })
+      delete row.body;
+    })
+    return articles.rows */
+  })
+}
+
 exports.selectArticleById = async (articleId) => {
-  articleId = Number(articleId)
-  const articleIdList = await getListOfArticleIds()
+  const articleIdNum = Number(articleId)
   const regex = new RegExp(/[^\d]/g)
-  if (regex.test(articleId)) {
+  if (regex.test(articleIdNum)) {
     return Promise.reject({status: 400, msg: 'Bad request'})
-  }
-  if (!articleIdList.includes(articleId)) {
-    return Promise.reject({status: 404, msg: 'Not found'})
   }
   return db.query(
     `SELECT * FROM articles 
-    WHERE article_id = $1;`, [articleId])
+    WHERE article_id = $1;`, [articleIdNum])
   .then((article) => {
+    if (article.rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" })
+    }
     return article.rows[0]
   })
 }

@@ -1,7 +1,8 @@
 const {
   selectAllTopics,
   selectAllEndpoints,
-  selectArticleById
+  selectArticleById, 
+  selectAllArticles
 } = require("../model/model.js");
 
 exports.getAllEndpoints = (req, res, next) => {
@@ -15,6 +16,13 @@ exports.getAllTopics = (req, res, next) => {
     res.status(200).send({ topics });
   })
   .catch(next);
+}
+
+exports.getAllArticles = (req, res, next) => {
+  selectAllArticles().then((articles) => {
+    res.status(200).send({ articles })
+  })
+  .catch(next)
 }
 
 exports.getArticleById = (req, res, next) => {
