@@ -4,7 +4,8 @@ const {
   selectArticleById, 
   selectAllArticles,
   selectCommentsByArticleId,
-  insertCommentByArticleId
+  insertCommentByArticleId,
+  updateArticleById
 } = require("../model/model.js");
 
 exports.getAllEndpoints = (req, res, next) => {
@@ -49,4 +50,13 @@ exports.postCommentByArticleId = (req, res, next) => {
     res.status(201).send( {comment} )
   })
   .catch(next);
+}
+
+exports.patchArticleById = (req, res, next) => {
+  const articleId = req.params.article_id;
+  const { inc_votes } = req.body;
+  updateArticleById(articleId, inc_votes).then((article) => {
+    res.status(200).send( {article} )
+  })
+  .catch(next)
 }
