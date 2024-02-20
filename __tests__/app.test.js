@@ -141,8 +141,50 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.articles).toBeSortedBy('created_at', {
-          descending: true,
+          descending: true
         });
+      })
+    });
+  });
+
+  describe('Get /api/articles/:article_id/comments', () => {
+    test('should return an array of comment objects with the given article id', () => {
+      return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.comments).toBeInstanceOf(Array)
+        expect(body.comments.length).toBe(11)
+      })
+    });
+
+    test('each comment should have the correct properties', () => {
+      return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        body.comments.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe('number')
+          expect(typeof comment.votes).toBe('number')
+          expect(typeof comment.created_at).toBe('string')
+          expect(typeof comment.author).toBe('string')
+          expect(typeof comment.body).toBe('string')
+          expect(comment.article_id).toBe(1)
+        })
+      })
+    });
+
+    test('comments should be served in order of most recent first', () => {
+      return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.comments).toBeSortedBy('created_at', {
+          descending: true
+        })
       })
     });
   });

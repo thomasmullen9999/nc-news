@@ -52,14 +52,6 @@ exports.selectAllArticles = async () => {
           })
       })
     }))
-    /* articles.rows.forEach((row) => {
-      // need to get the comment count of each row here
-      getCommentCount(row.article_id).then((commentCount) => {
-        console.log(commentCount, '<comment count', row.article_id, '<< article_id')
-      })
-      delete row.body;
-    })
-    return articles.rows */
   })
 }
 
@@ -77,5 +69,23 @@ exports.selectArticleById = async (articleId) => {
       return Promise.reject({ status: 404, msg: "Not found" })
     }
     return article.rows[0]
+  })
+}
+
+exports.selectCommentsByArticleId = (articleId) => {
+  const articleIdNum = Number(articleId)
+  const regex = new RegExp(/[^\d]/g)
+  if (regex.test(articleIdNum)) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  return db.query(
+    `SELECT * FROM comments
+    WHERE article_id = $1
+    ORDER BY created_at DESC;`, [articleIdNum])
+  .then((comments) => {
+    if (comments.rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" })
+    }
+    return comments.rows
   })
 }
