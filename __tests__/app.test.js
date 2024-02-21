@@ -388,4 +388,31 @@ describe('App', () => {
       });
     });
   });
+
+  describe('GET /api/users', () => {
+    test('GET:200 should return an array of users with the correct length', () => {
+      return request(app)
+      .get('/api/users')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body.users).toBeInstanceOf(Array)
+        expect(body.users.length).toBe(4)
+      })
+    });
+
+    test('each item in the returned array should be an object with a username, name and avatar_url property', () => {
+      return request(app)
+      .get('/api/users')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        body.users.forEach((user) => {
+          expect(typeof user.username).toBe('string')
+          expect(typeof user.name).toBe('string')
+          expect(typeof user.avatar_url).toBe('string')
+        })
+      })
+    });
+  })
 })

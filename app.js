@@ -4,7 +4,8 @@ const {
   getAllTopics,
   getAllEndpoints, 
   getArticleById, 
-  getAllArticles, 
+  getAllArticles,
+  getAllUsers,
   getCommentsByArticleId, 
   postCommentByArticleId, 
   patchArticleById,
@@ -18,6 +19,8 @@ app.get('/api', getAllEndpoints)
 app.get('/api/topics', getAllTopics)
 
 app.get('/api/articles', getAllArticles)
+
+app.get('/api/users', getAllUsers)
 
 app.get('/api/articles/:article_id', getArticleById)
 

@@ -24,6 +24,18 @@ exports.selectAllTopics = async () => {
   }
 }
 
+exports.selectAllUsers = async () => {
+  try {
+    return db.query(`SELECT * FROM users;`)
+    .then((users) => {
+      return users.rows
+    })
+  } 
+  catch(err) {
+    return err
+  }
+}
+
 exports.selectAllArticles = async () => {
   return db.query(`SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.body) AS comment_count FROM articles JOIN comments ON articles.article_id = comments.article_id 
   GROUP BY articles.article_id
