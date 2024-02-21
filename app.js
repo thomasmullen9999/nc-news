@@ -7,7 +7,8 @@ const {
   getAllArticles, 
   getCommentsByArticleId, 
   postCommentByArticleId, 
-  patchArticleById 
+  patchArticleById,
+  deleteCommentById
 } = require('./controller/controller.js')
 
 app.use(express.json())
@@ -26,9 +27,17 @@ app.post('/api/articles/:article_id/comments', postCommentByArticleId)
 
 app.patch('/api/articles/:article_id', patchArticleById)
 
+app.delete('/api/comments/:comment_id', deleteCommentById)
+
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
-    res.status(err.status).send({msg: err.msg})
+    res.status(err.status).send({ msg: err.msg });
+  }
+  else if (err.code === '22P02') {
+    res.status(400).send({ msg: 'Bad request' });
+  } 
+  else {
+    res.status(500).send({ msg: 'Internal Server Error' });
   }
 })
 
