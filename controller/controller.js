@@ -1,8 +1,9 @@
 const {
   selectAllTopics,
+  selectAllArticles,
+  selectAllUsers,
   selectAllEndpoints,
   selectArticleById, 
-  selectAllArticles,
   selectCommentsByArticleId,
   insertCommentByArticleId,
   updateArticleById,
@@ -25,6 +26,13 @@ exports.getAllTopics = (req, res, next) => {
 exports.getAllArticles = (req, res, next) => {
   selectAllArticles().then((articles) => {
     res.status(200).send({ articles })
+  })
+  .catch(next)
+}
+
+exports.getAllUsers = (req, res, next) => {
+  selectAllUsers().then((users) => {
+    res.status(200).send({ users })
   })
   .catch(next)
 }

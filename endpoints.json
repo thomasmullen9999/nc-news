@@ -26,6 +26,19 @@
       ]
     }
   },
+  "GET /api/users": {
+    "description": "serves up an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "butter_bridge",
+          "name": "jonny",
+          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+        }
+      ]
+    }
+  },
   "GET /api/articles/:article_id": {
     "description": "serves up an article object with the given ID",
     "queries": [],
