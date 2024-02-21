@@ -37,14 +37,9 @@ exports.selectAllArticles = async () => {
 }
 
 exports.selectArticleById = async (articleId) => {
-  const articleIdNum = Number(articleId)
-  const regex = new RegExp(/[^\d]/g)
-  if (regex.test(articleIdNum)) {
-    return Promise.reject({status: 400, msg: 'Bad request'})
-  }
   return db.query(
     `SELECT * FROM articles 
-    WHERE article_id = $1;`, [articleIdNum])
+    WHERE article_id = $1;`, [articleId])
   .then((article) => {
     if (article.rows.length === 0) {
       return Promise.reject({ status: 404, msg: "Not found" })
@@ -54,15 +49,10 @@ exports.selectArticleById = async (articleId) => {
 }
 
 exports.selectCommentsByArticleId = (articleId) => {
-  const articleIdNum = Number(articleId)
-  const regex = new RegExp(/[^\d]/g)
-  if (regex.test(articleIdNum)) {
-    return Promise.reject({status: 400, msg: 'Bad request'})
-  }
   return db.query(
     `SELECT * FROM comments
     WHERE article_id = $1
-    ORDER BY created_at DESC;`, [articleIdNum])
+    ORDER BY created_at DESC;`, [articleId])
   .then((comments) => {
     if (comments.rows.length === 0) {
       return Promise.reject({ status: 404, msg: "Not found" })
@@ -72,11 +62,6 @@ exports.selectCommentsByArticleId = (articleId) => {
 }
 
 exports.insertCommentByArticleId = (articleId, newComment) => {
-  const articleIdNum = Number(articleId)
-  const regex = new RegExp(/[^\d]/g)
-  if (regex.test(articleIdNum)) {
-    return Promise.reject({status: 400, msg: 'Bad request'})
-  }
   const { username, body } = newComment;
   if (!username || !body) {
     return Promise.reject({status: 400, msg: 'Bad request'})
@@ -85,25 +70,17 @@ exports.insertCommentByArticleId = (articleId, newComment) => {
   
   return db.query(
     `INSERT INTO comments 
-      (author, body, article_id, votes)
+      (author, body, article_id)
     VALUES
-      ($1, $2, $3, $4)
+      ($1, $2, $3)
     RETURNING *;`, 
-    [username, body, articleId, 0])
+    [username, body, articleId])
     .then((comment) => {
       return comment.rows[0]
-    })
-    .catch((err) => {
-      next(err)
     })
 }
 
 exports.updateArticleById = (articleId, inc_votes) => {
-  const articleIdNum = Number(articleId)
-  const regex = new RegExp(/[^\d]/g)
-  if (regex.test(articleIdNum)) {
-    return Promise.reject({status: 400, msg: 'Bad request'})
-  }
   if (!inc_votes) {
     return Promise.reject({status: 400, msg: 'Bad request'})
   }

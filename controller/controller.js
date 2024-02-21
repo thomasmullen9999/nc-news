@@ -34,7 +34,9 @@ exports.getArticleById = (req, res, next) => {
   selectArticleById(articleId).then((article) => {
     res.status(200).send({ article });
   })
-  .catch(next);
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.getCommentsByArticleId = (req, res, next) => {
@@ -42,7 +44,9 @@ exports.getCommentsByArticleId = (req, res, next) => {
   selectCommentsByArticleId(articleId).then((comments) => {
     res.status(200).send( {comments} )
   })
-  .catch(next);
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.postCommentByArticleId = (req, res, next) => {
@@ -50,7 +54,9 @@ exports.postCommentByArticleId = (req, res, next) => {
   insertCommentByArticleId(articleId, req.body).then((comment) => {
     res.status(201).send( {comment} )
   })
-  .catch(next);
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.patchArticleById = (req, res, next) => {
@@ -59,7 +65,9 @@ exports.patchArticleById = (req, res, next) => {
   updateArticleById(articleId, inc_votes).then((article) => {
     res.status(200).send( {article} )
   })
-  .catch(next)
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.deleteCommentById = (req, res, next) => {
