@@ -92,7 +92,7 @@ describe('App', () => {
 
     test('should return 404: not found if passed an article id that is an id not found in the database', () => {
       return request(app)
-      .get('/api/articles/999999999')
+      .get('/api/articles/99')
       .expect(404)
       .then((response) => {
         const body = response.body
@@ -102,7 +102,7 @@ describe('App', () => {
   });
 
   describe('GET /api/articles', () => {
-    test('should return an array of article objects, each with the correct properties', () => {
+    test('should return a status code of 200 with an array of article objects, each with the correct properties', () => {
       return request(app)
       .get('/api/articles')
       .expect(200)
@@ -200,7 +200,7 @@ describe('App', () => {
 
     test('should return 404: not found if passed an article id that is an id not found in the database', () => {
       return request(app)
-      .get('/api/articles/999999999/comments')
+      .get('/api/articles/99/comments')
       .expect(404)
       .then((response) => {
         const body = response.body
@@ -254,7 +254,7 @@ describe('App', () => {
       });
     });
     
-    // need to add a test here for if passed an article id that does not exists (eg. post /api/articles/99999999/comments), can't figure out right now so will come back to this later
+    // need to add a test here for if passed an article id that does not exists (eg. post /api/articles/99/comments), can't figure out right now so will come back to this later
   });
   describe('patch /api/articles/:article_id', () => {
     test('should respond with status code: 200 and the updated article', () => {
@@ -311,7 +311,7 @@ describe('App', () => {
         inc_votes: 50
       }
       return request(app)
-      .patch('/api/articles/999999999')
+      .patch('/api/articles/99')
       .send(requestBody)
       .expect(404)
       .then((response) => {
@@ -320,7 +320,7 @@ describe('App', () => {
       });
     });
 
-    test('missing keys on post object should return status: 400', () => {
+    test('missing keys on request object should return status: 400', () => {
       const requestBody = {}
       return request(app)
       .patch('/api/articles/1')
@@ -330,6 +330,43 @@ describe('App', () => {
         const body = response.body
         expect(body.msg).toBe('Bad request')
       })
+    });
+  });
+
+  describe('delete /api/comments/:comment_id', () => {
+    test('should respond with status code: 204 and remove the given comment from the database', () => {
+      return request(app)
+      .delete('/api/comments/18')
+      .expect(204)
+      .then((response) => {
+        expect(response.body).toEqual({})
+        // check that the comment has been removed from the database
+        return db.query(`SELECT * FROM comments;`)
+        .then((result) => {
+          // initially there were 18 comments, should be 1 less now
+          expect(result.rowCount).toBe(17)
+        })
+      })
+    });
+
+    test('should return 400: bad request if passed a comment id that is not a number', () => {
+      return request(app)
+      .delete('/api/comments/not-a-comment')
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+
+    test('should return 404: not found if passed a comment id that is an id not found in the database', () => {
+      return request(app)
+      .delete('/api/comments/99')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
     });
   });
 })
