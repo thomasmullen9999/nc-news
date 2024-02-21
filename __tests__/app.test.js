@@ -147,7 +147,7 @@ describe('App', () => {
     });
   });
 
-  describe('Get /api/articles/:article_id/comments', () => {
+  describe('GET /api/articles/:article_id/comments', () => {
     test('should return an array of comment objects with the given article id', () => {
       return request(app)
       .get('/api/articles/1/comments')
@@ -209,7 +209,7 @@ describe('App', () => {
     });
   });
 
-  describe('Post /api/articles/:article_id/comments', () => {
+  describe('POST /api/articles/:article_id/comments', () => {
     test('should respond with status: 201 and the posted comment after being given a new comment', () => {
       const requestBody = {
         username: 'butter_bridge',
@@ -223,7 +223,7 @@ describe('App', () => {
         const body = response.body
         expect(typeof body.comment.comment_id).toBe('number')
         expect(body.comment.body).toBe('This is a new comment')
-        expect(typeof body.comment.votes).toBe('number')
+        expect(body.comment.votes).toBe(0)
         expect(body.comment.author).toBe('butter_bridge')
         expect(body.comment.article_id).toBe(1)
         expect(typeof body.comment.created_at).toBe('string')
@@ -245,8 +245,13 @@ describe('App', () => {
     });
 
     test('should return 400: bad request if passed an article id that is not a number', () => {
+      const requestBody = {
+        username: 'butter_bridge',
+        body: 'This is a new comment'
+      }
       return request(app)
       .post('/api/articles/not-an-article/comments')
+      .send(requestBody)
       .expect(400)
       .then((response) => {
         const body = response.body
@@ -254,10 +259,24 @@ describe('App', () => {
       });
     });
     
-    // need to add a test here for if passed an article id that does not exists (eg. post /api/articles/99/comments), can't figure out right now so will come back to this later
+    test('should return 404: not found if passed an article id that does not exist in the articles table', () => {
+      const requestBody = {
+        username: 'butter_bridge',
+        body: 'This is a new comment'
+      }
+      return request(app)
+      .post('/api/articles/99/comments')
+      .send(requestBody)
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
+    });
   });
-  describe('patch /api/articles/:article_id', () => {
-    test('should respond with status code: 200 and the updated article', () => {
+
+  describe('PATCH /api/articles/:article_id', () => {
+    test('should respond with status code: 200 and the correct article', () => {
       const requestBody = {
         inc_votes: 50
       }
@@ -278,7 +297,7 @@ describe('App', () => {
       });
     });
     
-    test('votes property should be changed by the correct amount', () => {
+    test('votes property should be updated by the correct amount', () => {
       const requestBody = {
         inc_votes: 50
       }
@@ -333,7 +352,7 @@ describe('App', () => {
     });
   });
 
-  describe('delete /api/comments/:comment_id', () => {
+  describe('DELETE /api/comments/:comment_id', () => {
     test('should respond with status code: 204 and remove the given comment from the database', () => {
       return request(app)
       .delete('/api/comments/18')
