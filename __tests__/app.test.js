@@ -145,6 +145,31 @@ describe('App', () => {
         });
       })
     });
+
+    test('when a topic query is added, should filter the articles by the topic value specified in the query and return only articles with this topic', () => {
+      return request(app)
+      .get('/api/articles?topic=mitch')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        console.log(body)
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(12)
+        body.articles.forEach((article) => {
+	        expect(article.topic).toBe('mitch')
+        })
+      })
+    });
+
+    test('should return 404 not found when the given topic is not found in the database', () => {
+      return request(app)
+      .get('/api/articles?topic=dogs')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
+    });
   });
 
   describe('GET /api/articles/:article_id/comments', () => {

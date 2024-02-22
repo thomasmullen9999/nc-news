@@ -1,6 +1,14 @@
 const db = require ('../db/connection.js')
 const fs = require("fs/promises");
 
+function getListOfTopics() {
+  return db.query(`SELECT slug FROM topics;`)
+  .then((result) => {
+    const topics = result.rows.map((row) => row.slug)
+    return topics
+  })
+}
+
 exports.selectAllEndpoints = () => {
   return fs.readFile(`${__dirname}/../endpoints.json`, 'utf-8')
   .then((endpointsFile, err) => {
@@ -36,10 +44,34 @@ exports.selectAllUsers = async () => {
   }
 }
 
-exports.selectAllArticles = async () => {
-  return db.query(`SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.body) AS comment_count FROM articles JOIN comments ON articles.article_id = comments.article_id 
-  GROUP BY articles.article_id
-  ORDER BY created_at DESC;`)
+exports.selectAllArticles = async (topic) => {
+  const queryStr = 
+  `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
+  COUNT(comments.body) AS comment_count 
+  FROM articles 
+  LEFT OUTER JOIN comments 
+  ON articles.article_id = comments.article_id` 
+  const queryStr2 =
+  `GROUP BY articles.article_id 
+  ORDER BY created_at DESC;`
+  let topicStr = ''
+
+  // if the topic is not in the database
+  const topics = await getListOfTopics()
+  if (topic) {
+    console.log(topics, 'topics')
+    console.log(topic, 'topic')
+    if (!topics.includes(topic)) {
+      return Promise.reject({status: 404, msg: 'Not found'})
+    }
+    topicStr += `WHERE articles.topic = '${topic}'`;
+  }
+  console.log(`${queryStr} ${topicStr} ${queryStr2}`, '<<<< string')
+
+
+
+  // return db.query(`$1 $2 $3`, [queryStr, topicStr, queryStr2])
+  return db.query(`${queryStr} ${topicStr} ${queryStr2}`)
   .then((articles) => {
     return articles.rows
   })
@@ -78,8 +110,6 @@ exports.insertCommentByArticleId = (articleId, newComment) => {
   if (!username || !body) {
     return Promise.reject({status: 400, msg: 'Bad request'})
   }
-  // need to check if the article exists
-  
   return db.query(
     `INSERT INTO comments 
       (author, body, article_id)
