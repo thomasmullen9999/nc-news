@@ -55,22 +55,14 @@ exports.selectAllArticles = async (topic) => {
   `GROUP BY articles.article_id 
   ORDER BY created_at DESC;`
   let topicStr = ''
-
-  // if the topic is not in the database
   const topics = await getListOfTopics()
   if (topic) {
-    console.log(topics, 'topics')
-    console.log(topic, 'topic')
+    // if the topic is not in the topics table
     if (!topics.includes(topic)) {
       return Promise.reject({status: 404, msg: 'Not found'})
     }
     topicStr += `WHERE articles.topic = '${topic}'`;
   }
-  console.log(`${queryStr} ${topicStr} ${queryStr2}`, '<<<< string')
-
-
-
-  // return db.query(`$1 $2 $3`, [queryStr, topicStr, queryStr2])
   return db.query(`${queryStr} ${topicStr} ${queryStr2}`)
   .then((articles) => {
     return articles.rows
@@ -82,15 +74,21 @@ exports.selectAllArticles = async (topic) => {
 
 exports.selectArticleById = async (articleId) => {
   return db.query(
-    `SELECT * FROM articles 
-    WHERE article_id = $1;`, [articleId])
+    `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, articles.body
+    FROM articles 
+    LEFT OUTER JOIN comments 
+    ON articles.article_id = comments.article_id
+    WHERE articles.article_id = $1;`, [articleId])
   .then((article) => {
     if (article.rows.length === 0) {
       return Promise.reject({ status: 404, msg: "Not found" })
     }
+    article.rows[0].comment_count = article.rowCount;
     return article.rows[0]
   })
 }
+
+// SELECT album_title, albums.duration_in_seconds, COUNT(song_title) AS number_of_songs FROM albums JOIN songs ON albums.id = songs.album_id WHERE albums.id = 1;
 
 exports.selectCommentsByArticleId = (articleId) => {
   return db.query(

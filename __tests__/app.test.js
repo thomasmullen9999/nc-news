@@ -80,6 +80,16 @@ describe('App', () => {
       })
     });
 
+    test('response should include a comment_count', () => {
+      return request(app)
+      .get('/api/articles/3')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body.article.comment_count).toBe(2)
+      })
+    });
+
     test('should return 400: bad request if passed an article id that is not a number', () => {
       return request(app)
       .get('/api/articles/not-an-article')
@@ -152,7 +162,6 @@ describe('App', () => {
       .expect(200)
       .then((response) => {
         const body = response.body;
-        console.log(body)
         expect(body.articles).toBeInstanceOf(Array);
 	      expect(body.articles.length).toBe(12)
         body.articles.forEach((article) => {
