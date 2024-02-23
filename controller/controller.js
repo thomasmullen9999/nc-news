@@ -7,7 +7,8 @@ const {
   selectCommentsByArticleId,
   insertCommentByArticleId,
   updateArticleById,
-  removeCommentById
+  removeCommentById,
+  selectUserByUsername
 } = require("../model/model.js");
 
 exports.getAllEndpoints = (req, res, next) => {
@@ -83,6 +84,16 @@ exports.deleteCommentById = (req, res, next) => {
   const commentId = req.params.comment_id;
   removeCommentById(commentId).then(() => {
     res.status(204).send({})
+  })
+  .catch((err) => {
+    next(err)
+  })
+}
+
+exports.getUserByUsername = (req, res, next) => {
+  const username = req.params.username;
+  selectUserByUsername(username).then((user) => {
+    res.status(200).send({ user });
   })
   .catch((err) => {
     next(err)

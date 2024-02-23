@@ -98,8 +98,6 @@ exports.selectArticleById = async (articleId) => {
   })
 }
 
-// SELECT album_title, albums.duration_in_seconds, COUNT(song_title) AS number_of_songs FROM albums JOIN songs ON albums.id = songs.album_id WHERE albums.id = 1;
-
 exports.selectCommentsByArticleId = (articleId) => {
   return db.query(
     `SELECT * FROM comments
@@ -159,4 +157,17 @@ exports.removeCommentById = (commentId) => {
         return Promise.reject({ status: 404, msg: "Not found" })
       }
     })
+}
+
+exports.selectUserByUsername = async (username) => {
+  return db.query(
+    `SELECT username, name, avatar_url
+    FROM users
+    WHERE username = $1;`, [username])
+  .then((user) => {
+    if (user.rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" })
+    }
+    return user.rows[0]
+  })
 }
