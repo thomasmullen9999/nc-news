@@ -8,7 +8,8 @@ const {
   insertCommentByArticleId,
   updateArticleById,
   removeCommentById,
-  selectUserByUsername
+  selectUserByUsername,
+  updateCommentById
 } = require("../model/model.js");
 
 exports.getAllEndpoints = (req, res, next) => {
@@ -94,6 +95,17 @@ exports.getUserByUsername = (req, res, next) => {
   const username = req.params.username;
   selectUserByUsername(username).then((user) => {
     res.status(200).send({ user });
+  })
+  .catch((err) => {
+    next(err)
+  })
+}
+
+exports.patchCommentById = (req, res, next) => {
+  const commentId = req.params.comment_id;
+  const { inc_votes } = req.body;
+  updateCommentById(commentId, inc_votes).then((comment) => {
+    res.status(200).send( {comment} )
   })
   .catch((err) => {
     next(err)
