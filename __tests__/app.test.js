@@ -527,6 +527,31 @@ describe('App', () => {
           expect(typeof user.avatar_url).toBe('string')
         })
       })
-    });
+    })
+  })
+
+  describe('GET /api/users/:username', () => {
+    test('should return a status code of 200 and the correct user', () => {
+      return request(app)
+      .get('/api/users/rogersop')
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body.user.username).toBe('rogersop')
+        expect(body.user.name).toBe('paul')
+        expect(body.user.avatar_url).toBe('https://avatars2.githubusercontent.com/u/24394918?s=400&v=4')
+      })
+    })
+
+
+    test('should return a status code of 404: not found when a username that does not exist is passed in', () => {
+      return request(app)
+      .get('/api/users/notauser')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      })
+    })
   })
 })
