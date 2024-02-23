@@ -71,7 +71,6 @@ exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at')
   if (!['asc', 'desc'].includes(order)) {
     return Promise.reject({status: 400, msg: 'Bad request'})
   }
-  console.log(sortBy, order)
   const orderStr = `ORDER BY ${sortBy} ${order.toUpperCase()};`
 
   return db.query(`${queryStr} ${topicStr} ${queryStr2} ${orderStr}`)

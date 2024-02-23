@@ -188,7 +188,6 @@ describe('App', () => {
         const body = response.body;
         expect(body.articles).toBeInstanceOf(Array);
 	      expect(body.articles.length).toBe(13)
-        console.log(body.articles)
         expect(body.articles).toBeSortedBy('title', {
           descending: true
         })
