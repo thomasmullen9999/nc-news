@@ -554,4 +554,81 @@ describe('App', () => {
       })
     })
   })
+
+  describe('PATCH /api/comments/:comment_id', () => {
+    test('should respond with status code: 200 and the correct comment', () => {
+      const requestBody = {
+        inc_votes: 33
+      }
+      return request(app)
+      .patch('/api/comments/3')
+      .send(requestBody)
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(typeof body.comment.comment_id).toBe('number')
+        expect(typeof body.comment.body).toBe('string')
+        expect(typeof body.comment.votes).toBe('number')
+        expect(typeof body.comment.author).toBe('string')
+        expect(typeof body.comment.article_id).toBe('number')
+        expect(typeof body.comment.created_at).toBe('string')
+      });
+    });
+
+    test('votes property should be updated by the correct amount', () => {
+      const requestBody = {
+        inc_votes: 33
+      }
+      return request(app)
+      .patch('/api/comments/3')
+      .send(requestBody)
+      .expect(200)
+      .then((response) => {
+        const body = response.body
+        expect(body.comment.votes).toBe(133)
+      });
+    });
+
+    test('should return 400: bad request if passed a comment id that is not a number', () => {
+      const requestBody = {
+        inc_votes: 33
+      }
+      return request(app)
+      .patch('/api/comments/not-a-comment')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+
+    test('should return 404: not found if passed a comment id that is an id not found in the database', () => {
+      const requestBody = {
+        inc_votes: 33
+      }
+      return request(app)
+      .patch('/api/comments/99')
+      .send(requestBody)
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
+    });
+
+    test('missing keys on request object should return status: 400', () => {
+      const requestBody = {}
+      return request(app)
+      .patch('/api/comments/3')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      })
+    })
+  })
+
+  
 })
