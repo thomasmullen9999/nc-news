@@ -44,7 +44,7 @@ exports.selectAllUsers = async () => {
   }
 }
 
-exports.selectAllArticles = async (topic) => {
+exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at') => {
   const queryStr = 
   `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
   COUNT(comments.body) AS comment_count 
@@ -52,8 +52,8 @@ exports.selectAllArticles = async (topic) => {
   LEFT OUTER JOIN comments 
   ON articles.article_id = comments.article_id` 
   const queryStr2 =
-  `GROUP BY articles.article_id 
-  ORDER BY created_at DESC;`
+  `GROUP BY articles.article_id`
+
   let topicStr = ''
   const topics = await getListOfTopics()
   if (topic) {
@@ -63,7 +63,18 @@ exports.selectAllArticles = async (topic) => {
     }
     topicStr += `WHERE articles.topic = '${topic}'`;
   }
-  return db.query(`${queryStr} ${topicStr} ${queryStr2}`)
+
+  const validSortBys = ['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count']
+  if (!validSortBys.includes(sortBy)) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  if (!['asc', 'desc'].includes(order)) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  console.log(sortBy, order)
+  const orderStr = `ORDER BY ${sortBy} ${order.toUpperCase()};`
+
+  return db.query(`${queryStr} ${topicStr} ${queryStr2} ${orderStr}`)
   .then((articles) => {
     return articles.rows
   })

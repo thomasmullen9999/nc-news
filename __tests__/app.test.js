@@ -179,6 +179,87 @@ describe('App', () => {
         expect(body.msg).toBe('Not found')
       });
     });
+
+    test('when a sort by query is added, should return the articles sorted by the value of this query, and should default to descending order', () => {
+      return request(app)
+      .get('/api/articles?sort_by=title')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(13)
+        console.log(body.articles)
+        expect(body.articles).toBeSortedBy('title', {
+          descending: true
+        })
+      })
+    });
+
+    test('can be passed an order query which will determine the order of the results', () => {
+      return request(app)
+      .get('/api/articles?sort_by=votes&order=asc')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(13)
+        expect(body.articles).toBeSortedBy('votes', {
+          ascending: true
+        })
+      })
+    });
+
+    test('sort by, order and topic queries can all be used in conjunction and should return the expected result', () => {
+      return request(app)
+      .get('/api/articles?topic=mitch&sort_by=author&order=desc')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(12)
+        expect(body.articles).toBeSortedBy('author', {
+          descending: true
+        })
+	      body.articles.forEach((article) => {
+	        expect(article.topic).toBe('mitch')
+        })
+      })
+    });
+
+    test('if no sort by query is passed in, will default to sorting by created_at', () => {
+      return request(app)
+      .get('/api/articles?order=asc')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(13)
+        expect(body.articles).toBeSortedBy('created_at', {
+          ascending: true
+        })
+      })
+    });
+
+
+   test('should return 400 bad request if passed invalid order (not asc or desc)', () => {
+      return request(app)
+      .get('/api/articles?order=invalid')
+      .expect(400)
+      .then((response) => {
+        const body = response.body;
+        expect(body.msg).toBe('Bad request')
+      })
+    });
+
+   test('should return 400 bad request if passed invalid sort_by)', () => {
+      return request(app)
+      .get('/api/articles?sort_by=publisher')
+      .expect(400)
+      .then((response) => {
+        const body = response.body;
+        expect(body.msg).toBe('Bad request')
+      })
+    });
   });
 
   describe('GET /api/articles/:article_id/comments', () => {
