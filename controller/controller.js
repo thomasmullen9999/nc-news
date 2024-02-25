@@ -10,7 +10,8 @@ const {
   removeCommentById,
   selectUserByUsername,
   updateCommentById,
-  insertNewArticle
+  insertNewArticle,
+  insertNewTopic
 } = require("../model/model.js");
 
 exports.getAllEndpoints = (req, res, next) => {
@@ -123,6 +124,15 @@ exports.patchCommentById = (req, res, next) => {
 exports.postNewArticle = (req, res, next) => {
   insertNewArticle(req.body).then((article) => {
     res.status(201).send( {article} )
+  })
+  .catch((err) => {
+    next(err)
+  })
+}
+
+exports.postNewTopic = (req, res, next) => {
+  insertNewTopic(req.body).then((topic) => {
+    res.status(201).send( {topic} )
   })
   .catch((err) => {
     next(err)
