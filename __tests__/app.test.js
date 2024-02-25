@@ -163,7 +163,7 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.articles).toBeInstanceOf(Array);
-	      expect(body.articles.length).toBe(12)
+	      expect(body.total_count).toBe(12)
         body.articles.forEach((article) => {
 	        expect(article.topic).toBe('mitch')
         })
@@ -197,7 +197,7 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.articles).toBeInstanceOf(Array);
-	      expect(body.articles.length).toBe(13)
+	      expect(body.total_count).toBe(13)
         expect(body.articles).toBeSortedBy('title', {
           descending: true
         })
@@ -211,7 +211,7 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.articles).toBeInstanceOf(Array);
-	      expect(body.articles.length).toBe(13)
+	      expect(body.total_count).toBe(13)
         expect(body.articles).toBeSortedBy('votes', {
           ascending: true
         })
@@ -225,7 +225,7 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.articles).toBeInstanceOf(Array);
-	      expect(body.articles.length).toBe(12)
+	      expect(body.total_count).toBe(12)
         expect(body.articles).toBeSortedBy('author', {
           descending: true
         })
@@ -242,7 +242,7 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.articles).toBeInstanceOf(Array);
-	      expect(body.articles.length).toBe(13)
+	      expect(body.total_count).toBe(13)
         expect(body.articles).toBeSortedBy('created_at', {
           ascending: true
         })
@@ -260,13 +260,52 @@ describe('App', () => {
       })
     });
 
-   test('should return 400 bad request if passed invalid sort_by)', () => {
+   test('should return 400 bad request if passed invalid sort_by', () => {
       return request(app)
       .get('/api/articles?sort_by=publisher')
       .expect(400)
       .then((response) => {
         const body = response.body;
         expect(body.msg).toBe('Bad request')
+      })
+    });
+
+    test('pagination - should return articles paginated correctly when passed limit and p queries', () => {
+      return request(app)
+      .get('/api/articles?sort_by=title&limit=4&p=2')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(4)
+        expect(body.articles).toBeSortedBy('title', {
+          descending: true
+        })
+      })
+    });
+
+    test('pagination - limit should default to 10 and p should default to 1 when queries not passed in', () => {
+      return request(app)
+      .get('/api/articles?sort_by=title')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles).toBeInstanceOf(Array);
+	      expect(body.articles.length).toBe(10)
+        expect(body.articles).toBeSortedBy('title', {
+          descending: true
+        })
+      })
+    });
+
+    test('pagination - should respond with a total count property which discards the limit', () => {
+      return request(app)
+      .get('/api/articles?sort_by=title&limit=4&p=2')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.total_count).toBe(13)
+        })
       })
     });
   });
@@ -737,4 +776,3 @@ describe('App', () => {
     })
   })
   
-})

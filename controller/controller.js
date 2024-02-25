@@ -29,9 +29,9 @@ exports.getAllTopics = (req, res, next) => {
 }
 
 exports.getAllArticles = (req, res, next) => {
-  const { topic, order, sort_by } = req.query;
-  selectAllArticles(topic, order, sort_by).then((articles) => {
-    res.status(200).send({ articles })
+  const { topic, order, sort_by, limit, p } = req.query;
+  selectAllArticles(topic, order, sort_by, limit, p).then((result) => {
+    res.status(200).send({ articles: result.articles, total_count: result.total_count })
   })
   .catch((err) => {
     next(err)
