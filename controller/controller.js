@@ -23,7 +23,9 @@ exports.getAllTopics = (req, res, next) => {
   selectAllTopics().then((topics) => {
     res.status(200).send({ topics });
   })
-  .catch(next);
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.getAllArticles = (req, res, next) => {
@@ -31,14 +33,18 @@ exports.getAllArticles = (req, res, next) => {
   selectAllArticles(topic, order, sort_by).then((articles) => {
     res.status(200).send({ articles })
   })
-  .catch(next)
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.getAllUsers = (req, res, next) => {
   selectAllUsers().then((users) => {
     res.status(200).send({ users })
   })
-  .catch(next)
+  .catch((err) => {
+    next(err)
+  })
 }
 
 exports.getArticleById = (req, res, next) => {
