@@ -148,5 +148,30 @@
         "created_at": 1604113380000
       }
     }
+  },
+  "POST /api/articles": {
+    "description": "adds a new article to the database (article_img_url is optional)",
+    "queries": [],
+    "requestBodyFormat": { 
+      "author": "butter_bridge",
+      "title": "Brand new article",
+      "body": "this is a cool and exciting new article about cats",
+      "topic": "cats",
+      "article_img_url": "https://images.pexels.com/photos/208984/pexels-photo-208984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+    },
+    "exampleResponse": {
+      "article":
+      {
+        "author": "butter_bridge",
+        "title": "Brand new article",
+        "body": "this is a cool and exciting new article about cats",
+        "topic": "cats",
+        "article_img_url": "https://images.pexels.com/photos/208984/pexels-photo-208984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+        "article_id": 33,
+        "votes": 0,
+        "created_at": 1604113380000,
+        "comment_count": 0 
+      }
+    }
   }
 }

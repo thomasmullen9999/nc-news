@@ -9,6 +9,29 @@ function getListOfTopics() {
   })
 }
 
+function getListOfUsers() {
+  return db.query(`SELECT username FROM users;`)
+  .then((result) => {
+    const users = result.rows.map((row) => row.username)
+    return users
+  })
+}
+
+function getNewestArticle() {
+  return db.query(`
+    SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, articles.body, COUNT(comments.body) AS comment_count 
+    FROM articles 
+    LEFT OUTER JOIN comments 
+    ON articles.article_id = comments.article_id
+    GROUP BY articles.article_id 
+    ORDER BY articles.created_at DESC 
+    LIMIT 1;
+  `)
+  .then((result) => {
+    return result.rows[0]
+  })
+}
+
 exports.selectAllEndpoints = () => {
   return fs.readFile(`${__dirname}/../endpoints.json`, 'utf-8')
   .then((endpointsFile, err) => {
@@ -188,4 +211,50 @@ exports.updateCommentById = (commentId, inc_votes) => {
       }
       return comment.rows[0]
     })
+}
+
+exports.insertNewArticle = async (newArticle) => {
+  const { author, title, body, topic, article_img_url } = newArticle;
+
+  if (!author || !title || !body || !topic) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+
+  // check that user exists in database
+  const users = await getListOfUsers()
+  if (!users.includes(author)) {
+    return Promise.reject({status: 404, msg: 'Author not found'})
+  }
+
+  // check that topic exists in database
+  const topics = await getListOfTopics()
+  if (!topics.includes(topic)) {
+    return Promise.reject({status: 404, msg: 'Topic not found'})
+  }
+
+  // if article_img_url is passed in, insert it. Otherwise, don't include it and let SQL add it as its default value
+  if (article_img_url) {
+    return db.query(
+      `INSERT INTO articles 
+        (author, title, body, topic, article_img_url)
+      VALUES
+        ($1, $2, $3, $4, $5)
+      RETURNING *;`, 
+      [author, title, body, topic, article_img_url])
+      .then((article) => {
+        return article.rows[0]
+      })
+  }
+  else {
+    return db.query(
+      `INSERT INTO articles 
+        (author, title, body, topic)
+      VALUES
+        ($1, $2, $3, $4)
+      RETURNING *;`, 
+      [author, title, body, topic])
+      .then((article) => {
+        return article.rows[0]
+      })
+  }
 }
