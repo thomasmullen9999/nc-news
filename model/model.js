@@ -129,7 +129,7 @@ exports.selectArticleById = async (articleId) => {
   })
 }
 
-exports.selectCommentsByArticleId = (articleId) => {
+exports.selectCommentsByArticleId = (articleId, limit = 10, p = 1) => {
   return db.query(
     `SELECT * FROM comments
     WHERE article_id = $1
@@ -138,7 +138,15 @@ exports.selectCommentsByArticleId = (articleId) => {
     if (comments.rows.length === 0) {
       return Promise.reject({ status: 404, msg: "Not found" })
     }
-    return comments.rows
+    // pagination - filter the results using limit and p
+    const filteredComments = []
+    for (let i = (limit * (p-1)); i < limit * p; i++) {
+      filteredComments.push(comments.rows[i])
+    }
+    return { 
+      comments: filteredComments, 
+      total_count: comments.rowCount
+    }
   })
 }
 

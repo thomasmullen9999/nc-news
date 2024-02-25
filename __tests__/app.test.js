@@ -306,8 +306,7 @@ describe('App', () => {
         const body = response.body;
         expect(body.total_count).toBe(13)
         })
-      })
-    });
+    })
   });
 
   describe('GET /api/articles/:article_id/comments', () => {
@@ -318,7 +317,7 @@ describe('App', () => {
       .then((response) => {
         const body = response.body;
         expect(body.comments).toBeInstanceOf(Array)
-        expect(body.comments.length).toBe(11)
+        expect(body.total_count).toBe(11)
       })
     });
 
@@ -370,6 +369,28 @@ describe('App', () => {
         expect(body.msg).toBe('Not found')
       });
     });
+
+    test('pagination - should return articles paginated correctly when passed limit and p queries', () => {
+      return request(app)
+      .get('/api/articles/3/comments?limit=4&p=2')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.comments).toBeInstanceOf(Array);
+	      expect(body.comments.length).toBe(4)
+      })
+    })
+
+    test('pagination - limit should default to 10 and p should default to 1 when queries not passed in', () => {
+      return request(app)
+      .get('/api/articles/3/comments')
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.comments).toBeInstanceOf(Array);
+	      expect(body.comments.length).toBe(10)
+      })
+    })
   });
 
   describe('POST /api/articles/:article_id/comments', () => {
@@ -775,4 +796,4 @@ describe('App', () => {
       })
     })
   })
-  
+});
