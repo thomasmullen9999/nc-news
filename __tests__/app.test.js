@@ -630,5 +630,101 @@ describe('App', () => {
     })
   })
 
+  describe('POST /api/articles', () => {
+    test('should respond with status: 201 and the newly created article object', () => {
+      const requestBody = {
+        author: 'butter_bridge',
+        title: 'Brand new article',
+        body: 'this is a cool and exciting new article about cats',
+        topic: 'cats',
+        article_img_url: "https://images.pexels.com/photos/208984/pexels-photo-208984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+      }
+      return request(app)
+      .post('/api/articles')
+      .send(requestBody)
+      .expect(201)
+      .then((response) => {
+        const body = response.body
+        expect(typeof body.article.article_id).toBe('number')
+        expect(body.article.author).toBe('butter_bridge')
+        expect(body.article.title).toBe('Brand new article')
+        expect(body.article.body).toBe('this is a cool and exciting new article about cats')
+        expect(body.article.votes).toBe(0)
+        expect(body.article.topic).toBe('cats')
+        expect(body.article.article_img_url).toBe("https://images.pexels.com/photos/208984/pexels-photo-208984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2")
+        expect(typeof body.article.created_at).toBe('string')
+        // need to get comment count working
+        // expect(body.article.comment_count).toBe(0)
+      })
+    }) 
+
+    test('article_img_url should default if not provided in the request body', () => {
+      const requestBody = {
+        author: 'butter_bridge',
+        title: 'Brand new article',
+        body: 'this is a cool and exciting new article about cats',
+        topic: 'cats'
+      }
+      return request(app)
+      .post('/api/articles')
+      .send(requestBody)
+      .expect(201)
+      .then((response) => {
+        const body = response.body
+        expect(body.article.article_img_url).toBe('https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700')
+      })
+    })
+
+
+    test('should return 400: bad request if request body has missing properties', () => {
+      const requestBody = {
+        title: 'Brand new article',
+        body: 'this is a cool and exciting new article about cats'
+      }
+      return request(app)
+      .post('/api/articles')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+	      expect(body.msg).toBe('Bad request')
+      })
+    })
+
+
+    test('should return 404: author not found if author does not exist in database', () => {
+      const requestBody = {
+        author: 'unidentified',
+        title: 'Brand new article',
+        body: 'this is a cool and exciting new article about cats',
+        topic: 'cats'
+      }
+      return request(app)
+      .post('/api/articles')
+      .send(requestBody)
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+	      expect(body.msg).toBe('Author not found')
+      })
+    });
+
+    test('should return 404: topic not found if topic does not exist in database', () => {
+      const requestBody = {
+        author: 'butter_bridge',
+        title: 'Brand new article',
+        body: 'this is a cool and exciting new article about cats',
+        topic: 'unidentified'
+      }
+      return request(app)
+      .post('/api/articles')
+      .send(requestBody)
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Topic not found')
+      })
+    })
+  })
   
 })
