@@ -67,7 +67,7 @@ exports.selectAllUsers = async () => {
   }
 }
 
-exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at') => {
+exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at', limit = 10, p = 1) => {
   const queryStr = 
   `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
   COUNT(comments.body) AS comment_count 
@@ -101,7 +101,15 @@ exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at')
     if (articles.rows.length === 0 && topicStr) {
       return Promise.reject({ status: 404, msg: "No articles found with this topic" })
     }
-    return articles.rows
+    // pagination - filter the results using limit and p
+    const filteredArticles = []
+    for (let i = (limit * (p-1)); i < limit * p; i++) {
+      filteredArticles.push(articles.rows[i])
+    }
+    return { 
+      articles: filteredArticles, 
+      total_count: articles.rowCount
+    }
   })
 }
 
