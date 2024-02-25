@@ -98,10 +98,10 @@ exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at')
 
   return db.query(`${queryStr} ${topicStr} ${queryStr2} ${orderStr}`)
   .then((articles) => {
+    if (articles.rows.length === 0 && topicStr) {
+      return Promise.reject({ status: 404, msg: "No articles found with this topic" })
+    }
     return articles.rows
-  })
-  .catch((err) => {
-    console.log(err)
   })
 }
 

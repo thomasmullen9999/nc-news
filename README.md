@@ -15,7 +15,7 @@ Minimum version of Postgres required: v16
 The repo can be cloned using this url:
 https://github.com/thomasmullen9999/nc-news.git
 
-2) To install the relevant dependencies required to run this project locally, run the following comments in the terminal whilst in this project's directory:
+2) To install the relevant dependencies required to run this project locally, run the following commands in the terminal whilst in this project's directory:
 
 npm install dotenv
 npm install express
@@ -23,15 +23,27 @@ npm install pg
 npm install supertest
 npm install husky
 
+Alternatively, to install all of these dependencies at once, simply run:
+
+npm install
+
 3) Creating the appropriate .env files
 
 Create two files in the root directory: 
 .env.test and .env.development. 
 Into each, add PGDATABASE=, with the correct database name for that environment.
 
+Normally, it would not be safe to include the names of our databases in a public readme file, but since this is a portfolio piece designed for other users to view and use, it is acceptable to include them in this example. Ergo, the following should be added to each file:
+
+.env.test
+PGDATABASE=nc_news_test
+
+.env.development
+PGDATABASE=nc_news
+
 It is important that you add both of these files to the .gitignore file, as this prevents other users from being able to view these database names.
 
-4) Setting up and seeing the database
+4) Setting up and seeding the database
 
 To setup and seed the local database, enter the following commands in the terminal of the project directory:
 npm run setup-dbs

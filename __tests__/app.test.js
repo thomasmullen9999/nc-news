@@ -180,6 +180,16 @@ describe('App', () => {
       });
     });
 
+    test('should return 404 when passed a topic which does exist but no articles exist that are associated with it', () => {
+      return request(app)
+      .get('/api/articles?topic=paper')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('No articles found with this topic')
+      });
+    });
+
     test('when a sort by query is added, should return the articles sorted by the value of this query, and should default to descending order', () => {
       return request(app)
       .get('/api/articles?sort_by=title')
