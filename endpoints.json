@@ -174,5 +174,21 @@
         "comment_count": 0 
       }
     }
+  },
+  "POST /api/topics": {
+    "description": "adds a new topic to the database",
+    "queries": [],
+    "requestBodyFormat": { 
+      "slug": "topic name here",
+      "description": "description here" 
+    },
+    "exampleResponse": {
+      "article":
+      {
+        "topic_id": 5,
+        "slug": "topic name here",
+        "description": "description here"
+      }
+    }
   }
 }

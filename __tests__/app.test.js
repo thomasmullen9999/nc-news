@@ -796,4 +796,53 @@ describe('App', () => {
       })
     })
   })
+
+  describe('POST /api/topics', () => {
+    test('should respond with status: 201 and the newly added topic', () => {
+      const requestBody = {
+        slug: 'parrots',
+	      description: 'these talkative birds are real crazy'
+      }
+      return request(app)
+      .post('/api/topics')
+      .send(requestBody)
+      .expect(201)
+      .then((response) => {
+        const body = response.body
+	      expect(body.topic.slug).toBe('parrots')
+	      expect(body.topic.description).toBe('these talkative birds are real crazy')
+      })
+    });
+
+    test('should return 400: bad request if request body has missing properties', () => {
+      const requestBody = {
+        slug: 'parrots'
+      }
+      return request(app)
+      .post('/api/topics')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+	      expect(body.msg).toBe('Bad request')
+      })
+    });
+
+    test('should respond with 400: Bad request (duplicate key) if passed a topic slug which already exists in the database', () => {
+      const requestBody = {
+        slug: 'cats',
+	      description: 'Not dogs'
+      }
+      return request(app)
+      .post('/api/topics')
+      .send(requestBody)
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+	      expect(body.msg).toBe('Bad request (duplicate key)')
+      })
+    });
+  });
+
+
 });
