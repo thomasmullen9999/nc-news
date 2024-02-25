@@ -77,7 +77,6 @@ exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at',
   const queryStr2 =
   `GROUP BY articles.article_id`
 
-  console.log(limit, p)
   let topicStr = ''
   const topics = await getListOfTopics()
   if (topic) {
