@@ -844,5 +844,55 @@ describe('App', () => {
     });
   });
 
+  describe('DELETE /api/articles/:article_id', () => {
+    test('should respond with status code: 204 and remove the given article from the database', () => {
+      return request(app)
+      .delete('/api/articles/3')
+      .expect(204)
+      .then((response) => {
+        expect(response.body).toEqual({})
+        // check that the article has been removed from the database
+        return db.query(`SELECT * FROM articles;`)
+        .then((result) => {
+          // initially there were 13 articles, should be 1 less now
+          expect(result.rowCount).toBe(12)
+        })
+      })
+    });
+
+    test('should return 400: bad request if passed an article id that is not a number', () => {
+      return request(app)
+      .delete('/api/articles/not-an-article')
+      .expect(400)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Bad request')
+      });
+    });
+
+    test('should return 404: not found if passed an article id that is an id not found in the database', () => {
+      return request(app)
+      .delete('/api/articles/99')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      });
+    });
+
+    test('should delete all comments associated with this article', () => {
+      return request(app)
+      .delete('/api/articles/3')
+      .expect(204)
+      .then((response) => {
+        // check that the comments associated with this article have been removed from the database
+        return db.query(`SELECT * FROM comments;`)
+        .then((result) => {
+          // initially there were 18 comments, should be 2 less now
+          expect(result.rowCount).toBe(16)
+        })
+      })
+    })
+  });
 
 });

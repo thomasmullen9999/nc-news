@@ -11,7 +11,8 @@ const {
   selectUserByUsername,
   updateCommentById,
   insertNewArticle,
-  insertNewTopic
+  insertNewTopic,
+  removeArticleById
 } = require("../model/model.js");
 
 exports.getAllEndpoints = (req, res, next) => {
@@ -133,6 +134,16 @@ exports.postNewArticle = (req, res, next) => {
 exports.postNewTopic = (req, res, next) => {
   insertNewTopic(req.body).then((topic) => {
     res.status(201).send( {topic} )
+  })
+  .catch((err) => {
+    next(err)
+  })
+}
+
+exports.deleteArticleById = (req, res, next) => {
+  const articleId = req.params.article_id;
+  removeArticleById(articleId).then(() => {
+    res.status(204).send({})
   })
   .catch((err) => {
     next(err)
