@@ -190,5 +190,10 @@
         "description": "description here"
       }
     }
+  },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes the article with the given article id",
+    "queries": [],
+    "exampleResponse": {}
   }
 }
