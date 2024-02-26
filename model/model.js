@@ -104,7 +104,12 @@ exports.selectAllArticles = async (topic, order = 'desc', sortBy = 'created_at',
     // pagination - filter the results using limit and p
     const filteredArticles = []
     for (let i = (limit * (p-1)); i < limit * p; i++) {
-      filteredArticles.push(articles.rows[i])
+      if (articles.rows[i]) {
+        filteredArticles.push(articles.rows[i])
+      }
+    }
+    if (filteredArticles.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" })
     }
     return { 
       articles: filteredArticles, 
@@ -141,7 +146,12 @@ exports.selectCommentsByArticleId = (articleId, limit = 10, p = 1) => {
     // pagination - filter the results using limit and p
     const filteredComments = []
     for (let i = (limit * (p-1)); i < limit * p; i++) {
-      filteredComments.push(comments.rows[i])
+      if (comments.rows[i]) {
+        filteredComments.push(comments.rows[i])
+      }
+    }
+    if (filteredComments.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" })
     }
     return { 
       comments: filteredComments, 
