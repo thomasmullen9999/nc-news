@@ -268,6 +268,7 @@ exports.insertNewArticle = async (newArticle) => {
       RETURNING *;`, 
       [author, title, body, topic, article_img_url])
       .then((article) => {
+        article.rows[0].comment_count = 0;
         return article.rows[0]
       })
   }
@@ -280,6 +281,7 @@ exports.insertNewArticle = async (newArticle) => {
       RETURNING *;`, 
       [author, title, body, topic])
       .then((article) => {
+        article.rows[0].comment_count = 0;
         return article.rows[0]
       })
   }

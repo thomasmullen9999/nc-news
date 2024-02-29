@@ -3,12 +3,23 @@ const { app } = require('../app')
 const db = require('../db/connection')
 const seed = require('../db/seeds/seed')
 const { articleData, commentData, topicData, userData } = require('../db/data/test-data')
-const fs = require('fs').promises;
 
 beforeEach(() => seed({ articleData, commentData, topicData, userData }));
 afterAll(() => db.end())
 
 describe('App', () => {
+  describe('General Error Handling', () => {
+    test('should return 404: not found when given an invalid route', () => {
+      return request(app)
+      .get('/api/not-a-route')
+      .expect(404)
+      .then((response) => {
+        const body = response.body
+        expect(body.msg).toBe('Not found')
+      })
+    });
+  });
+
   describe('GET /api/topics', () => {
     test('GET:200 should return an array of topics with the correct length', () => {
       return request(app)
@@ -768,8 +779,7 @@ describe('App', () => {
         expect(body.article.topic).toBe('cats')
         expect(body.article.article_img_url).toBe("https://images.pexels.com/photos/208984/pexels-photo-208984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2")
         expect(typeof body.article.created_at).toBe('string')
-        // need to get comment count working
-        // expect(body.article.comment_count).toBe(0)
+        expect(body.article.comment_count).toBe(0)
       })
     }) 
 
